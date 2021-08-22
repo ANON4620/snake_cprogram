@@ -39,12 +39,15 @@ int main()
         clrscr();
         createSnake();
         createFood();
-        draw(box);
+        draw();
         refillBoard();
         input();
         move();
         if(hasCollided())
+        {
+            puts("\nGame Over!");
             break;
+        }
         if(hasEatenFood())
         {
             changeFoodPosition();
@@ -53,8 +56,6 @@ int main()
         
         usleep(200000); // delay in microseconds
     }
-    
-    puts("\nGame Over!");
     
     return 0;
 }
