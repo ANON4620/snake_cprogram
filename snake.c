@@ -4,9 +4,9 @@
 #include <stdbool.h>
 #include <time.h>
 
-char board[12][12];
-int snakeX[144] = {0, 0, 0}; // snake and tail X position
-int snakeY[144] = {0, 1, 2}; // snake and tail Y position
+char board[16][16];
+int snakeX[256] = {0, 0, 0}; // snake and tail X position
+int snakeY[256] = {0, 1, 2}; // snake and tail Y position
 int foodX, foodY; // food X position and food Y position
 
 char boardPattern = '.';
@@ -14,7 +14,7 @@ char snake = '#';
 char food = '@';
 
 int length = 3; // snake length
-int box = 12; // matrix
+int box = 16; // matrix
 char key = 'd'; // current key in buffer
 
 int main()
