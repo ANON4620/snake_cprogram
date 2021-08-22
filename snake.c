@@ -5,50 +5,56 @@
 #include <time.h>
 
 char board[12][12];
-int snakeX[12] = {0, 0, 0, 0}; // snake and tail X position
-int snakeY[12] = {0, 1, 2, 3}; // snake and tail Y position
+int snakeX[144] = {0, 0, 0}; // snake and tail X position
+int snakeY[144] = {0, 1, 2}; // snake and tail Y position
 int foodX, foodY; // food X position and food Y position
 
 char boardPattern = '.';
 char snake = '#';
 char food = '@';
 
-int length = 4; // snake length
+int length = 3; // snake length
 int box = 12; // matrix
 char key = 'd'; // current key in buffer
 
 int main()
 {
     void createBoard();
+    void changeFoodPosition();
+    void createSnake();
     void createFood();
     void draw();
-    void refill();
+    void refillBoard();
     void input();
     void move();
-    void createSnake();
+    int hasCollided();
     int hasEatenFood();
     void addTail();
     
     createBoard();
-    createFood();
+    changeFoodPosition();
     
     while(true)
     {
         clrscr();
         createSnake();
+        createFood();
         draw(box);
-        refill();
+        refillBoard();
         input();
         move();
-        
+        if(hasCollided())
+            break;
         if(hasEatenFood())
         {
-            createFood();
+            changeFoodPosition();
             addTail();
         }
         
         usleep(200000); // delay in microseconds
     }
+    
+    puts("\nGame Over!");
     
     return 0;
 }
@@ -60,15 +66,26 @@ void createBoard()
             board[i][j] = boardPattern;
 }
 
+void changeFoodPosition()
+{
+    srand(time(NULL));
+    foodX = rand() % box;
+    foodY = rand() % box;
+}
+
 void createSnake()
 {
     for(int i = 0; i < length; i++)
-            board[snakeX[i]][snakeY[i]] = snake;
+        board[snakeX[i]][snakeY[i]] = snake;
+}
+
+void createFood()
+{
+    board[foodX][foodY] = food;
 }
 
 void draw()
 {
-    
     for(int i = 0; i < box; i++)
     {
         for(int j = 0; j < box; j++)
@@ -80,10 +97,10 @@ void draw()
     }
 }
 
-void refill()
+void refillBoard()
 {
     for(int i = 0; i < length; i++)
-            board[snakeX[i]][snakeY[i]] = boardPattern;
+        board[snakeX[i]][snakeY[i]] = boardPattern;
 }
 
 void input()
@@ -92,7 +109,8 @@ void input()
     {
         char temp = getch();
         if(temp == 'a' || temp == 'd' || temp == 's' || temp == 'w')
-            key = temp;
+            if((temp == 'a' && key != 'd') || (temp == 'd' && key != 'a') || (temp == 's' && key != 'w') || (temp == 'w' && key != 's')) 
+                key = temp;
     }
 }
 
@@ -133,20 +151,23 @@ void move()
     }
 }
 
+int hasCollided()
+{
+    for(int i = 0; i < length - 1; i++)
+    {
+        if(snakeX[length - 1] == snakeX[i] && snakeY[length - 1] == snakeY[i])
+            return 1;
+    }
+    
+    return 0;
+}
+
 int hasEatenFood()
 {
     if(snakeX[length - 1] == foodX && snakeY[length - 1] == foodY)
         return true;
     else
         return false;
-}
-
-void createFood()
-{
-    srand(time(NULL));
-    foodX = rand() % box;
-    foodY = rand() % box;
-    board[foodX][foodY] = food;
 }
 
 void addTail()
