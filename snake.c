@@ -89,7 +89,11 @@ void refill()
 void input()
 {
     if(kbhit())
-        key = getch();
+    {
+        char temp = getch();
+        if(temp == 'a' || temp == 'd' || temp == 's' || temp == 'w')
+            key = temp;
+    }
 }
 
 void move()
@@ -151,4 +155,5 @@ void addTail()
     snakeY[length] = snakeY[length - 1];
     length++;
 }
-    
+
+
