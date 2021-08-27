@@ -10,7 +10,7 @@ int snakeY[256] = {0, 1, 2}; // snake and tail Y position
 int foodX, foodY; // food X position and food Y position
 
 char boardPattern = '.';
-char snake = '#';
+char snake = '*';
 char food = '@';
 
 int length = 3; // snake length
@@ -20,7 +20,7 @@ char key = 'd'; // current key in buffer
 int main()
 {
     void createBoard();
-    void changeFoodPosition();
+    void setFoodPosition();
     void createSnake();
     void createFood();
     void draw();
@@ -32,7 +32,7 @@ int main()
     void addTail();
     
     createBoard();
-    changeFoodPosition();
+    setFoodPosition();
     
     while(true)
     {
@@ -50,7 +50,7 @@ int main()
         }
         if(hasEatenFood())
         {
-            changeFoodPosition();
+            setFoodPosition();
             addTail();
         }
         
@@ -67,7 +67,7 @@ void createBoard()
             board[i][j] = boardPattern;
 }
 
-void changeFoodPosition()
+void setFoodPosition()
 {
     srand(time(NULL));
     foodX = rand() % box;
@@ -90,18 +90,14 @@ void draw()
     for(int i = 0; i < box; i++)
     {
         for(int j = 0; j < box; j++)
-        {
             printf("%c", board[i][j]);
-            if(j == box - 1)
-                printf("\n");
-        }
+        printf("\n");
     }
 }
 
 void refillBoard()
 {
-    for(int i = 0; i < length; i++)
-        board[snakeX[i]][snakeY[i]] = boardPattern;
+    board[snakeX[0]][snakeY[0]] = boardPattern;
 }
 
 void input()
@@ -157,10 +153,10 @@ int hasCollided()
     for(int i = 0; i < length - 1; i++)
     {
         if(snakeX[length - 1] == snakeX[i] && snakeY[length - 1] == snakeY[i])
-            return 1;
+            return true;
     }
     
-    return 0;
+    return false;
 }
 
 int hasEatenFood()
@@ -178,4 +174,4 @@ void addTail()
     length++;
 }
 
-
+    
