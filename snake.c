@@ -2,7 +2,7 @@
 #include <conio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <time.h>
+#include <unistd.h>
 
 char board[16][16];
 int snakeX[256] = {0, 0, 0}; // snake and tail X position
