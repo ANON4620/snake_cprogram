@@ -1,38 +1,54 @@
+#define ushort unsigned short
+
 #include <stdio.h>
 #include <conio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <unistd.h>
+#include <time.h>
 
-char board[16][16];
-int snakeX[256] = {0, 0, 0}; // snake and tail X position
-int snakeY[256] = {0, 1, 2}; // snake and tail Y position
-int foodX, foodY; // food X position and food Y position
+struct Board
+{
+    ushort box;
+    char array[16][16];
+    char pattern;
+};
+struct Snake
+{
+    short X[256];
+    short Y[256];
+    ushort length;
+    char sprite;
+};
+struct Food
+{
+    ushort X, Y;
+    char sprite;
+};
 
-char boardPattern = '.';
-char snake = '*';
-char food = '@';
+struct Board board = {16, {}, '.'};
+struct Snake snake = { {0, 0, 0},
+                       {0, 1, 2},
+                        3,
+                       '*' };
+struct Food food = {0, 0, '@'};
 
-int length = 3; // snake length
-int box = 16; // matrix
 char key = 'd'; // current key in buffer
 
 int main()
 {
-    void createBoard();
     void setFoodPosition();
+    void createBoard();
     void createSnake();
     void createFood();
     void draw();
-    void refillBoard();
     void input();
     void move();
     int hasCollided();
     int hasEatenFood();
     void addTail();
     
-    createBoard();
     setFoodPosition();
+    createBoard();
     
     while(true)
     {
@@ -40,7 +56,6 @@ int main()
         createSnake();
         createFood();
         draw();
-        refillBoard();
         input();
         move();
         if(hasCollided())
@@ -60,44 +75,41 @@ int main()
     return 0;
 }
 
-void createBoard()
-{
-    for(int i = 0; i < box; i++)
-        for(int j = 0; j < box; j++)
-            board[i][j] = boardPattern;
-}
-
 void setFoodPosition()
 {
     srand(time(NULL));
-    foodX = rand() % box;
-    foodY = rand() % box;
+    food.X = rand() % board.box;
+    food.Y = rand() % board.box;
+}
+
+void createBoard()
+{
+    for(ushort i = 0; i < board.box; i++)
+        for(ushort j = 0; j < board.box; j++)
+            board.array[i][j] = board.pattern;
 }
 
 void createSnake()
 {
-    for(int i = 0; i < length; i++)
-        board[snakeX[i]][snakeY[i]] = snake;
+    for(ushort i = 0; i < snake.length; i++)
+        board.array[snake.X[i]][snake.Y[i]] = snake.sprite;
 }
 
 void createFood()
 {
-    board[foodX][foodY] = food;
+    board.array[food.X][food.Y] = food.sprite;
 }
 
 void draw()
 {
-    for(int i = 0; i < box; i++)
+    for(ushort i = 0; i < board.box; i++)
     {
-        for(int j = 0; j < box; j++)
-            printf("%c", board[i][j]);
+        for(ushort j = 0; j < board.box; j++)
+            printf("%c", board.array[i][j]);
         printf("\n");
     }
-}
-
-void refillBoard()
-{
-    board[snakeX[0]][snakeY[0]] = boardPattern;
+    
+    board.array[snake.X[0]][snake.Y[0]] = board.pattern;
 }
 
 void input()
@@ -105,63 +117,60 @@ void input()
     if(kbhit())
     {
         char temp = getch();
-        if(temp == 'a' || temp == 'd' || temp == 's' || temp == 'w')
-            if((temp == 'a' && key != 'd') || (temp == 'd' && key != 'a') || (temp == 's' && key != 'w') || (temp == 'w' && key != 's')) 
-                key = temp;
+        if((temp == 'w' && key != 's') || (temp == 's' && key != 'w') || (temp == 'a' && key != 'd') || (temp == 'd' && key != 'a'))
+            key = temp;
     }
 }
 
 void move()
 {
-    for(int i = 0; i < length - 1; i++)
+    for(ushort i = 0; i < snake.length - 1; i++)
     {
-        snakeX[i] = snakeX[i + 1];
-        snakeY[i] = snakeY[i + 1];
+        snake.X[i] = snake.X[i + 1];
+        snake.Y[i] = snake.Y[i + 1];
     }
     
     
     switch(key)
     {
+        case 'w':
+        snake.X[snake.length - 1]--;
+        if(snake.X[snake.length - 1] < 0)
+            snake.X[snake.length - 1] = board.box - 1;
+        break;
+        
+        case 's':
+        snake.X[snake.length - 1]++;
+        if(snake.X[snake.length - 1] > board.box - 1)
+            snake.X[snake.length - 1] = 0;
+        break;
+        
         case 'a':
-        snakeY[length - 1]--;
-        if(snakeY[length - 1] < 0)
-            snakeY[length - 1] = box - 1;
+        snake.Y[snake.length - 1]--;
+        if(snake.Y[snake.length - 1] < 0)
+            snake.Y[snake.length - 1] = board.box - 1;
         break;
             
         case 'd':
-        snakeY[length - 1]++;
-        if(snakeY[length - 1] > box - 1)
-            snakeY[length - 1] = 0;
-        break;
-            
-        case 's':
-        snakeX[length - 1]++;
-        if(snakeX[length - 1] > box - 1)
-            snakeX[length - 1] = 0;
-        break;
-            
-        case 'w':
-        snakeX[length - 1]--;
-        if(snakeX[length - 1] < 0)
-            snakeX[length - 1] = box - 1;
+        snake.Y[snake.length - 1]++;
+        if(snake.Y[snake.length - 1] > board.box - 1)
+            snake.Y[snake.length - 1] = 0;
         break;
     }
 }
 
 int hasCollided()
 {
-    for(int i = 0; i < length - 1; i++)
-    {
-        if(snakeX[length - 1] == snakeX[i] && snakeY[length - 1] == snakeY[i])
+    for(ushort i = 0; i < snake.length - 1; i++)
+        if(snake.X[snake.length - 1] == snake.X[i] && snake.Y[snake.length - 1] == snake.Y[i])
             return true;
-    }
     
     return false;
 }
 
 int hasEatenFood()
 {
-    if(snakeX[length - 1] == foodX && snakeY[length - 1] == foodY)
+    if(snake.X[snake.length - 1] == food.X && snake.Y[snake.length - 1] == food.Y)
         return true;
     else
         return false;
@@ -169,9 +178,9 @@ int hasEatenFood()
 
 void addTail()
 {
-    snakeX[length] = snakeX[length - 1];
-    snakeY[length] = snakeY[length - 1];
-    length++;
+    snake.X[snake.length] = snake.X[snake.length - 1];
+    snake.Y[snake.length] = snake.Y[snake.length - 1];
+    snake.length++;
 }
 
     
