@@ -108,8 +108,6 @@ void draw()
             printf("%c", board.array[i][j]);
         printf("\n");
     }
-    
-    board.array[snake.X[0]][snake.Y[0]] = board.pattern;
 }
 
 void input()
@@ -124,6 +122,9 @@ void input()
 
 void move()
 {
+    // Change last tail sprite to board pattern -- '*' to '.'
+    board.array[snake.X[0]][snake.Y[0]] = board.pattern;
+    
     for(ushort i = 0; i < snake.length - 1; i++)
     {
         snake.X[i] = snake.X[i + 1];
