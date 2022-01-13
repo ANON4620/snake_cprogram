@@ -1,3 +1,4 @@
+#define box 16
 #define ushort unsigned short
 
 #include <stdio.h>
@@ -8,14 +9,13 @@
 
 struct Board
 {
-    ushort box;
-    char array[16][16];
+    char array[box][box];
     char pattern;
 };
 struct Snake
 {
-    short X[256];
-    short Y[256];
+    short X[box * box];
+    short Y[box * box];
     ushort length;
     char sprite;
 };
@@ -25,7 +25,7 @@ struct Food
     char sprite;
 };
 
-struct Board board = {16, {}, '.'};
+struct Board board = {{}, '.'};
 struct Snake snake = { {0, 0, 0},
                        {0, 1, 2},
                         3,
@@ -78,14 +78,14 @@ int main()
 void setFoodPosition()
 {
     srand(time(NULL));
-    food.X = rand() % board.box;
-    food.Y = rand() % board.box;
+    food.X = rand() % box;
+    food.Y = rand() % box;
 }
 
 void createBoard()
 {
-    for(ushort i = 0; i < board.box; i++)
-        for(ushort j = 0; j < board.box; j++)
+    for(ushort i = 0; i < box; i++)
+        for(ushort j = 0; j < box; j++)
             board.array[i][j] = board.pattern;
 }
 
@@ -102,9 +102,9 @@ void createFood()
 
 void draw()
 {
-    for(ushort i = 0; i < board.box; i++)
+    for(ushort i = 0; i < box; i++)
     {
-        for(ushort j = 0; j < board.box; j++)
+        for(ushort j = 0; j < box; j++)
             printf("%c", board.array[i][j]);
         printf("\n");
     }
@@ -136,24 +136,24 @@ void move()
         case 'w':
         snake.X[snake.length - 1]--;
         if(snake.X[snake.length - 1] < 0)
-            snake.X[snake.length - 1] = board.box - 1;
+            snake.X[snake.length - 1] = box - 1;
         break;
         
         case 's':
         snake.X[snake.length - 1]++;
-        if(snake.X[snake.length - 1] > board.box - 1)
+        if(snake.X[snake.length - 1] > box - 1)
             snake.X[snake.length - 1] = 0;
         break;
         
         case 'a':
         snake.Y[snake.length - 1]--;
         if(snake.Y[snake.length - 1] < 0)
-            snake.Y[snake.length - 1] = board.box - 1;
+            snake.Y[snake.length - 1] = box - 1;
         break;
             
         case 'd':
         snake.Y[snake.length - 1]++;
-        if(snake.Y[snake.length - 1] > board.box - 1)
+        if(snake.Y[snake.length - 1] > box - 1)
             snake.Y[snake.length - 1] = 0;
         break;
     }
