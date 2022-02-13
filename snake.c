@@ -32,7 +32,6 @@ struct Snake snake = { {0, 0, 0},
                        '*' };
 struct Food food = {0, 0, '@'};
 
-char key = 'd'; // current key in buffer
 
 int main()
 {
@@ -41,11 +40,13 @@ int main()
     void createSnake();
     void createFood();
     void draw();
-    void input();
-    void move();
+    void input(char*);
+    void move(char);
     int hasCollided();
     int hasEatenFood();
     void addTail();
+    
+    char key = 'd'; // current key in buffer
     
     setFoodPosition();
     createBoard();
@@ -56,8 +57,8 @@ int main()
         createSnake();
         createFood();
         draw();
-        input();
-        move();
+        input(&key);
+        move(key);
         if(hasCollided())
         {
             puts("\nGame Over!");
@@ -72,7 +73,7 @@ int main()
         usleep(200000); // delay in microseconds
     }
     
-    return 0;
+    return(0);
 }
 
 void setFoodPosition()
@@ -105,26 +106,25 @@ void draw()
     for(ushort i = 0; i < box; i++)
     {
         for(ushort j = 0; j < box; j++)
-            printf("%c", board.array[i][j]);
-        printf("\n");
+            putchar(board.array[i][j]);
+        putchar('\n');
     }
+    
+    board.array[snake.X[0]][snake.Y[0]] = board.pattern;
 }
 
-void input()
+void input(char* p)
 {
     if(kbhit())
     {
         char temp = getch();
-        if((temp == 'w' && key != 's') || (temp == 's' && key != 'w') || (temp == 'a' && key != 'd') || (temp == 'd' && key != 'a'))
-            key = temp;
+        if((temp == 'w' && *p != 's') || (temp == 's' && *p != 'w') || (temp == 'a' && *p != 'd') || (temp == 'd' && *p != 'a'))
+            *p = temp;
     }
 }
 
-void move()
+void move(char key)
 {
-    // Change last tail sprite to board pattern -- '*' to '.'
-    board.array[snake.X[0]][snake.Y[0]] = board.pattern;
-    
     for(ushort i = 0; i < snake.length - 1; i++)
     {
         snake.X[i] = snake.X[i + 1];
@@ -184,4 +184,4 @@ void addTail()
     snake.length++;
 }
 
-    
+
