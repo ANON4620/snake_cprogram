@@ -48,6 +48,8 @@ int main()
     
     char key = 'd'; // current key in buffer
     
+    srand(time(NULL));
+    
     setFoodPosition();
     createBoard();
     
@@ -78,7 +80,6 @@ int main()
 
 void setFoodPosition()
 {
-    srand(time(NULL));
     food.X = rand() % box;
     food.Y = rand() % box;
 }
@@ -184,4 +185,4 @@ void addTail()
     snake.length++;
 }
 
-
+    
