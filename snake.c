@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
+#include <assert.h>
 
 #define SNAKE_BOX 20
 
@@ -112,13 +113,13 @@ void draw(struct Board *board, struct Snake snake)
     board->array[snake.X[0]][snake.Y[0]] = board->pattern;
 }
 
-void input(char* p)
+void input(char *key)
 {
     if(kbhit())
     {
         char temp = getch();
-        if((temp == 'w' && *p != 's') || (temp == 's' && *p != 'w') || (temp == 'a' && *p != 'd') || (temp == 'd' && *p != 'a') || (temp == 'q'))
-            *p = temp;
+        if((temp == 'w' && *key != 's') || (temp == 's' && *key != 'w') || (temp == 'a' && *key != 'd') || (temp == 'd' && *key != 'a') || (temp == 'q'))
+            *key = temp;
     }
 }
 
@@ -184,9 +185,10 @@ void addTail(struct Snake *snake)
 {
     int snake_length = snake->length;
     
+    assert(snake_length < SNAKE_BOX);
+    
     snake->X[snake_length] = snake->X[snake_length - 1];
     snake->Y[snake_length] = snake->Y[snake_length - 1];
     snake->length++;
 }
-
 
