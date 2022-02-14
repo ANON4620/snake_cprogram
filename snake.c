@@ -182,8 +182,10 @@ int hasEatenFood(struct Snake snake, struct Food food)
 
 void addTail(struct Snake *snake)
 {
-    snake->X[snake->length] = snake->X[snake->length - 1];
-    snake->Y[snake->length] = snake->Y[snake->length - 1];
+    int snake_length = snake->length;
+    
+    snake->X[snake_length] = snake->X[snake_length - 1];
+    snake->Y[snake_length] = snake->Y[snake_length - 1];
     snake->length++;
 }
 
