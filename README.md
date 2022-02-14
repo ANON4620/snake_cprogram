@@ -1,11 +1,13 @@
 # Instructions
 
-W - move up
+w - move up
 
-S - move down
+s - move down
 
-A - move left
+a - move left
 
-D - move right
+d - move right
+
+q - quit
 
 **Enjoy!**
