@@ -25,6 +25,7 @@ struct Food
     char sprite;
 };
 
+static void setSnakePosition(struct Snake *);
 static void setFoodPosition(struct Food *);
 static void createBoard(struct Board *);
 static void createSnake(struct Board *, struct Snake);
@@ -39,18 +40,18 @@ static void addTail(struct Snake *);
 int main()
 {
     struct Board board = {{}, '.'};
-    struct Snake snake = { {0, 0, 0},
-                       {0, 1, 2},
-                        3,
-                       '*' };
+    struct Snake snake = {{}, {}, 3, '*'};
     struct Food food = {0, 0, '@'};
-
+    
+    assert(snake.length < SNAKE_BOX);
+    
     char key = 'd'; // current key in buffer
     
     srand(time(NULL));
     
-    setFoodPosition(&food);
     createBoard(&board);
+    setSnakePosition(&snake);
+    setFoodPosition(&food);
     
     while(true)
     {
@@ -75,6 +76,17 @@ int main()
     }
     
     return(0);
+}
+
+void setSnakePosition(struct Snake *snake)
+{
+    int snake_length = snake->length;
+    
+    for(int i = 0; i < snake_length; i++)
+    {
+        snake->X[i] = 0;
+        snake->Y[i] = i;
+    }
 }
 
 void setFoodPosition(struct Food *food)
@@ -185,7 +197,7 @@ void addTail(struct Snake *snake)
 {
     int snake_length = snake->length;
     
-    assert(snake_length < SNAKE_BOX);
+    assert(snake_length < (SNAKE_BOX * SNAKE_BOX));
     
     snake->X[snake_length] = snake->X[snake_length - 1];
     snake->Y[snake_length] = snake->Y[snake_length - 1];
