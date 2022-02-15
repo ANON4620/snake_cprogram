@@ -49,9 +49,9 @@ int main()
     
     srand(time(NULL));
     
-    createBoard(&board);
     setSnakePosition(&snake);
     setFoodPosition(&food);
+    createBoard(&board);
     
     while(true)
     {
