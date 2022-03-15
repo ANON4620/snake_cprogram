@@ -9,11 +9,6 @@
 
 #define SNAKE_BOX 20
 
-struct Board
-{
-    char array[SNAKE_BOX][SNAKE_BOX];
-    char pattern;
-};
 struct Snake
 {
     int X[SNAKE_BOX * SNAKE_BOX];
@@ -29,10 +24,7 @@ struct Food
 
 static void setSnakePosition(struct Snake *);
 static void setFoodPosition(struct Food *);
-static void createBoard(struct Board *);
-static void createSnake(struct Board *, struct Snake);
-static void createFood(struct Board *, struct Food);
-static void draw(struct Board *, struct Snake);
+static void draw(char, struct Snake, struct Food food);
 static void input(char*);
 static void move(struct Snake *, char);
 static int hasCollided(struct Snake);
@@ -41,9 +33,11 @@ static void addTail(struct Snake *);
 
 int main()
 {
-    struct Board board = {{}, '.'};
+    char board = '.';
     struct Snake snake = {{}, {}, 3, '*'};
     struct Food food = {0, 0, '@'};
+    
+    struct timespec request = {0, 200000000}; // for nanosleep function
     
     assert(snake.length < SNAKE_BOX);
     
@@ -53,15 +47,15 @@ int main()
     
     setSnakePosition(&snake);
     setFoodPosition(&food);
-    createBoard(&board);
     
     while(true)
     {
         clrscr();
-        createSnake(&board, snake);
-        createFood(&board, food);
-        draw(&board, snake);
+        draw(board, snake, food);
         input(&key);
+        if(key == 'q')
+            exit(EXIT_SUCCESS);
+        
         move(&snake, key);
         if(hasCollided(snake))
         {
@@ -74,7 +68,7 @@ int main()
             addTail(&snake);
         }
         
-        usleep(200000); // delay in microseconds
+        nanosleep(&request, NULL);
     }
     
     return(0);
@@ -97,34 +91,37 @@ void setFoodPosition(struct Food *food)
     food->Y = rand() % SNAKE_BOX;
 }
 
-void createBoard(struct Board *board)
+void draw(char board, struct Snake snake, struct Food food)
 {
-    for(int i = 0; i < SNAKE_BOX; i++)
-        for(int j = 0; j < SNAKE_BOX; j++)
-            board->array[i][j] = board->pattern;
-}
-
-void createSnake(struct Board *board, struct Snake snake)
-{
-    for(int i = 0; i < snake.length; i++)
-        board->array[snake.X[i]][snake.Y[i]] = snake.sprite;
-}
-
-void createFood(struct Board *board, struct Food food)
-{
-    board->array[food.X][food.Y] = food.sprite;
-}
-
-void draw(struct Board *board, struct Snake snake)
-{
-    for(int i = 0; i < SNAKE_BOX; i++)
+    for(int x = 0; x < SNAKE_BOX; x++)
     {
-        for(int j = 0; j < SNAKE_BOX; j++)
-            putchar(board->array[i][j]);
+        for(int y = 0; y < SNAKE_BOX; y++)
+        {
+            bool print = false;
+            
+            if((x == food.X) && (y == food.Y))
+            {
+                putchar(food.sprite);
+                print = true;
+            }
+            else
+            {
+                int snake_length = snake.length;
+             
+                for(int i = 0; i < snake_length; i++)
+                    if((snake.X[i] == x) && (snake.Y[i] == y))
+                    {
+                        putchar(snake.sprite);
+                        print = true;
+                        break;
+                    }
+            }
+            
+            if(print == false)
+                putchar(board);
+        }
         putchar('\n');
     }
-    
-    board->array[snake.X[0]][snake.Y[0]] = board->pattern;
 }
 
 void input(char *key)
@@ -172,9 +169,6 @@ void move(struct Snake *snake, char key)
         if(snake->Y[snake_length - 1] > SNAKE_BOX - 1)
             snake->Y[snake_length - 1] = 0;
         break;
-        
-        case 'q':
-        exit(EXIT_SUCCESS);
     }
 }
 
