@@ -23,14 +23,14 @@ struct Food
     int X, Y;
 };
 
-static void setSnakePosition(struct Snake *);
-static void setFoodPosition(struct Food *);
+static void set_snake_position(struct Snake *);
+static void set_food_position(struct Snake, struct Food *);
 static void draw(struct Snake, struct Food food);
 static void input(char *);
 static void move(struct Snake *, char);
-static int hasCollided(struct Snake);
-static int hasEatenFood(struct Snake, struct Food);
-static void addTail(struct Snake *);
+static int has_collided(struct Snake);
+static int has_eaten_food(struct Snake, struct Food);
+static void add_tail(struct Snake *);
 
 int main()
 {
@@ -47,8 +47,8 @@ int main()
     
     srand(time(NULL));
     
-    setSnakePosition(&snake);
-    setFoodPosition(&food);
+    set_snake_position(&snake);
+    set_food_position(snake, &food);
     
     while(true)
     {
@@ -59,15 +59,15 @@ int main()
             exit(EXIT_SUCCESS);
         
         move(&snake, key);
-        if(hasCollided(snake))
+        if(has_collided(snake))
         {
             puts("\nGame Over!");
             break;
         }
-        if(hasEatenFood(snake, food))
+        if(has_eaten_food(snake, food))
         {
-            setFoodPosition(&food);
-            addTail(&snake);
+            set_food_position(snake, &food);
+            add_tail(&snake);
         }
         
         nanosleep(&request, NULL);
@@ -76,7 +76,7 @@ int main()
     return(0);
 }
 
-void setSnakePosition(struct Snake *snake)
+void set_snake_position(struct Snake *snake)
 {
     int snake_length = snake->length;
     
@@ -87,14 +87,47 @@ void setSnakePosition(struct Snake *snake)
     }
 }
 
-void setFoodPosition(struct Food *food)
+void set_food_position(struct Snake snake, struct Food *food)
 {
-    food->X = rand() % BOARD;
-    food->Y = rand() % BOARD;
+    int snake_length = snake.length;
+    int arr_size = (BOARD * BOARD) - snake.length;
+    char X[arr_size];
+    char Y[arr_size];
+    
+    int i = 0;
+    
+    for(int x = 0; x < BOARD; x++)
+    {
+        for(int y = 0; y < BOARD; y++)
+        {
+            bool blank_pos = true;
+            
+            for(int i = 0; i < snake_length; i++)
+            {
+                if((snake.X[i] == x) && (snake.Y[i] == y))
+                {
+                    blank_pos = false;
+                    break;
+                }
+            }
+            
+            if(blank_pos == true)
+            {
+                X[i] = x;
+                Y[i] = y;
+                i++;
+            }
+        }
+    }
+    
+    food->X = X[rand() % arr_size];
+    food->Y = Y[rand() % arr_size];
 }
 
 void draw(struct Snake snake, struct Food food)
 {
+    int snake_length = snake.length;
+    
     for(int x = 0; x < BOARD; x++)
     {
         for(int y = 0; y < BOARD; y++)
@@ -111,12 +144,14 @@ void draw(struct Snake snake, struct Food food)
                 int snake_length = snake.length;
              
                 for(int i = 0; i < snake_length; i++)
+                {
                     if((snake.X[i] == x) && (snake.Y[i] == y))
                     {
                         putchar(SNAKE_SPRITE);
                         print = true;
                         break;
                     }
+                }
             }
             
             if(print == false)
@@ -174,7 +209,7 @@ void move(struct Snake *snake, char key)
     }
 }
 
-int hasCollided(struct Snake snake)
+int has_collided(struct Snake snake)
 {
     for(int i = 0; i < snake.length - 1; i++)
         if(snake.X[snake.length - 1] == snake.X[i] && snake.Y[snake.length - 1] == snake.Y[i])
@@ -183,7 +218,7 @@ int hasCollided(struct Snake snake)
     return false;
 }
 
-int hasEatenFood(struct Snake snake, struct Food food)
+int has_eaten_food(struct Snake snake, struct Food food)
 {
     if(snake.X[snake.length - 1] == food.X && snake.Y[snake.length - 1] == food.Y)
         return true;
@@ -191,7 +226,7 @@ int hasEatenFood(struct Snake snake, struct Food food)
         return false;
 }
 
-void addTail(struct Snake *snake)
+void add_tail(struct Snake *snake)
 {
     int snake_length = snake->length;
     
