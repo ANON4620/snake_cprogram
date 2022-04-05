@@ -1,11 +1,11 @@
-#define NDEBUG
+// X[0] Y[0] is the head of the snake
+// X[length - 1] Y[length - 1] is the tail of the snake
 
 #include <stdio.h>
 #include <conio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
-#include <assert.h>
 
 #define BOARD 20
 #define BOARD_SPRITE '.'
@@ -36,14 +36,10 @@ int main()
 {
     struct Snake snake;
     struct Food food;
-    
     struct timespec request = {0, 200000000}; // for nanosleep function
+    char key = 'd'; // current key in buffer
     
     snake.length = 3;
-    
-    assert(snake.length < SNAKE_BOX);
-    
-    char key = 'd'; // current key in buffer
     
     srand(time(NULL));
     
@@ -55,10 +51,12 @@ int main()
         clrscr();
         draw(snake, food);
         input(&key);
+        
         if(key == 'q')
             exit(EXIT_SUCCESS);
         
         move(&snake, key);
+        
         if(has_collided(snake))
         {
             puts("\nGame Over!");
@@ -66,8 +64,8 @@ int main()
         }
         if(has_eaten_food(snake, food))
         {
-            set_food_position(snake, &food);
             add_tail(&snake);
+            set_food_position(snake, &food);
         }
         
         nanosleep(&request, NULL);
@@ -79,18 +77,21 @@ int main()
 void set_snake_position(struct Snake *snake)
 {
     int snake_length = snake->length;
-    
-    for(int i = 0; i < snake_length; i++)
+    int y = 0;
+     
+    for(int i = snake_length - 1; i >= 0; i--)
     {
         snake->X[i] = 0;
-        snake->Y[i] = i;
+        snake->Y[i] = y;
+        y++;
     }
 }
 
 void set_food_position(struct Snake snake, struct Food *food)
 {
+    int random;
     int snake_length = snake.length;
-    int arr_size = (BOARD * BOARD) - snake.length;
+    int arr_size = (BOARD * BOARD) - snake.length - 1; // -1 for food
     char X[arr_size];
     char Y[arr_size];
     
@@ -102,12 +103,17 @@ void set_food_position(struct Snake snake, struct Food *food)
         {
             bool blank_pos = true;
             
-            for(int i = 0; i < snake_length; i++)
+            if(x == food->X && y == food->Y)
+                blank_pos = false;
+            else
             {
-                if((snake.X[i] == x) && (snake.Y[i] == y))
+                for(int i = snake_length - 1; i >= 0; i--)
                 {
-                    blank_pos = false;
-                    break;
+                    if((snake.X[i] == x) && (snake.Y[i] == y))
+                    {
+                        blank_pos = false;
+                        break;
+                    }
                 }
             }
             
@@ -120,8 +126,9 @@ void set_food_position(struct Snake snake, struct Food *food)
         }
     }
     
-    food->X = X[rand() % arr_size];
-    food->Y = Y[rand() % arr_size];
+    random = rand() % arr_size;
+    food->X = X[random];
+    food->Y = Y[random];
 }
 
 void draw(struct Snake snake, struct Food food)
@@ -141,9 +148,7 @@ void draw(struct Snake snake, struct Food food)
             }
             else
             {
-                int snake_length = snake.length;
-             
-                for(int i = 0; i < snake_length; i++)
+                for(int i = snake_length - 1; i >= 0; i--)
                 {
                     if((snake.X[i] == x) && (snake.Y[i] == y))
                     {
@@ -175,44 +180,44 @@ void move(struct Snake *snake, char key)
 {
     int snake_length = snake->length;
     
-    for(int i = 0; i < snake_length - 1; i++)
+    for(int i = snake_length - 1; i > 0; i--)
     {
-        snake->X[i] = snake->X[i + 1];
-        snake->Y[i] = snake->Y[i + 1];
+        snake->X[i] = snake->X[i - 1];
+        snake->Y[i] = snake->Y[i - 1];
     }
      
     switch(key)
     {
         case 'w':
-        snake->X[snake_length - 1]--;
-        if(snake->X[snake_length - 1] < 0)
-            snake->X[snake_length - 1] = BOARD - 1;
+        snake->X[0]--;
+        if(snake->X[0] < 0)
+            snake->X[0] = BOARD - 1;
         break;
         
         case 's':
-        snake->X[snake_length - 1]++;
-        if(snake->X[snake_length - 1] > BOARD - 1)
-            snake->X[snake_length - 1] = 0;
+        snake->X[0]++;
+        if(snake->X[0] > BOARD - 1)
+            snake->X[0] = 0;
         break;
         
         case 'a':
-        snake->Y[snake_length - 1]--;
-        if(snake->Y[snake_length - 1] < 0)
-            snake->Y[snake_length - 1] = BOARD - 1;
+        snake->Y[0]--;
+        if(snake->Y[0] < 0)
+            snake->Y[0] = BOARD - 1;
         break;
             
         case 'd':
-        snake->Y[snake_length - 1]++;
-        if(snake->Y[snake_length - 1] > BOARD - 1)
-            snake->Y[snake_length - 1] = 0;
+        snake->Y[0]++;
+        if(snake->Y[0] > BOARD - 1)
+            snake->Y[0] = 0;
         break;
     }
 }
 
 int has_collided(struct Snake snake)
 {
-    for(int i = 0; i < snake.length - 1; i++)
-        if(snake.X[snake.length - 1] == snake.X[i] && snake.Y[snake.length - 1] == snake.Y[i])
+    for(int i = snake.length - 1; i > 0; i--)
+        if(snake.X[0] == snake.X[i] && snake.Y[0] == snake.Y[i])
             return true;
     
     return false;
@@ -220,7 +225,7 @@ int has_collided(struct Snake snake)
 
 int has_eaten_food(struct Snake snake, struct Food food)
 {
-    if(snake.X[snake.length - 1] == food.X && snake.Y[snake.length - 1] == food.Y)
+    if(snake.X[0] == food.X && snake.Y[0] == food.Y)
         return true;
     else
         return false;
@@ -229,8 +234,6 @@ int has_eaten_food(struct Snake snake, struct Food food)
 void add_tail(struct Snake *snake)
 {
     int snake_length = snake->length;
-    
-    assert(snake_length < (SNAKE_BOX * SNAKE_BOX));
     
     snake->X[snake_length] = snake->X[snake_length - 1];
     snake->Y[snake_length] = snake->Y[snake_length - 1];
